@@ -1,0 +1,11 @@
+bot:
+  token: 6131921484:AAHI9IPgBbZxquEdCMjPyIQVJtNL6gjV9ZQ
+
+db:
+  username: postgres
+  password: postgres
+  host: localhost:5432
+  database: pilly
+
+log:
+  level: debug
