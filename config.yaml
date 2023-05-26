@@ -1,5 +1,5 @@
 bot:
-  token: 6131921484:AAHI9IPgBbZxquEdCMjPyIQVJtNL6gjV9ZQ
+  token: 
 
 db:
   username: postgres
