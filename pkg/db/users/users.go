@@ -14,6 +14,7 @@ type User struct {
 	FirstName string    `pg:"first_name,notnull"`
 	LastName  string    `pg:"last_name"`
 	Created   time.Time `pg:"created,notnull"`
+	Updated   time.Time `pg:"updated"`
 }
 
 type Svc struct {

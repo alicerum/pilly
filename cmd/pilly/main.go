@@ -25,10 +25,12 @@ func main() {
 
 	ctx := context.Background()
 
-	cfg, err := config.ReadConfig(*configPath)
+	cfg, err := config.ReadConfig(configPath)
 	if err != nil {
 		printErrAndExit("error while reading config file", err)
 	}
+
+	fmt.Printf("token is %v\n", cfg.Bot.Token)
 
 	if err := cfg.Log.SetLogger(); err != nil {
 		printErrAndExit("could not set logging level", err)
@@ -38,6 +40,7 @@ func main() {
 	if err != nil {
 		printErrAndExit("could not connect to the db", err)
 	}
+	defer db.Close()
 
 	usersSvc := users.NewSvc(db)
 

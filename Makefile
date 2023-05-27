@@ -1,5 +1,6 @@
 DOCKER = docker
 GO = go
+CONFIG = ./config.yaml
 
 test-db:
 	$(DOCKER) run \
@@ -12,3 +13,12 @@ test-db:
 
 build:
 	$(GO) build ./cmd/pilly
+
+.PHONY: migrations
+migrate:
+	$(GO) run ./cmd/migrations/*.go -config $(CONFIG)
+
+.PHONY: migrations
+migrate-down:
+	$(GO) run ./cmd/migrations/*.go -config $(CONFIG) down
+
