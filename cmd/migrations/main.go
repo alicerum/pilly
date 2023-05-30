@@ -34,7 +34,7 @@ func main() {
 		exitf("empty config parameter")
 	}
 
-	cfg, err := config.ReadConfig(*cfgPath)
+	cfg, err := config.ReadConfig(cfgPath)
 	if err != nil {
 		exitf("couldnt read config: %v", err)
 	}

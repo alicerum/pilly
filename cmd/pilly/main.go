@@ -7,11 +7,24 @@ import (
 	"os"
 	"time"
 
+	"github.com/alicerum/pilly/pkg/commands/dispatch"
 	"github.com/alicerum/pilly/pkg/config"
+	pillyDB "github.com/alicerum/pilly/pkg/db"
 	"github.com/alicerum/pilly/pkg/db/users"
 	"github.com/rs/zerolog/log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+)
+
+var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonURL("1.com", "http://1.com"),
+		tgbotapi.NewInlineKeyboardButtonData("2", "2data"),
+		tgbotapi.NewInlineKeyboardButtonData("3", "3data"),
+	),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("4", "4data"),
+	),
 )
 
 func printErrAndExit(errMsg string, err error) {
@@ -42,7 +55,8 @@ func main() {
 	}
 	defer db.Close()
 
-	usersSvc := users.NewSvc(db)
+	dbSvc := pillyDB.New(db)
+	dispatcher := dispatch.NewDispatcher(dbSvc)
 
 	bot, err := tgbotapi.NewBotAPI(cfg.Bot.Token)
 	if err != nil {
@@ -53,20 +67,28 @@ func main() {
 	upd.Timeout = 60
 
 	updates := bot.GetUpdatesChan(upd)
-	for u := range updates {
-		if u.Message != nil {
-			log.Info().
-				Str("from", u.Message.From.UserName).
-				Str("text", u.Message.Text).
-				Msg("got message")
+	for update := range updates {
+		if update.Message != nil {
+			user := users.User{
+				ID:        update.Message.From.ID,
+				Username:  update.Message.From.UserName,
+				FirstName: update.Message.From.FirstName,
+				LastName:  update.Message.From.LastName,
+				Created:   time.Now().UTC(),
+			}
+			dbSvc.Users().Persist(&user)
+
+			if update.Message.IsCommand() {
+				response, err := dispatcher.Process(update.Message)
+				if err != nil {
+					log.Error().Err(err).Msg("could not process tg message")
+				} else {
+					_, err := bot.Send(response)
+					if err != nil {
+						log.Error().Err(err).Msg("could not send response")
+					}
+				}
+			}
 		}
-		u := users.User{
-			ID:        u.Message.From.ID,
-			Username:  u.Message.From.UserName,
-			FirstName: u.Message.From.FirstName,
-			LastName:  u.Message.From.LastName,
-			Created:   time.Now().UTC(),
-		}
-		usersSvc.Persist(&u)
 	}
 }

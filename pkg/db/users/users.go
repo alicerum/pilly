@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/rs/zerolog/log"
 )
 
 type User struct {
@@ -28,15 +29,20 @@ func NewSvc(db *pg.DB) *Svc {
 }
 
 func (s *Svc) GetByID(id int64) (User, error) {
+	log.Debug().Int64("id", id).Msg("getting user by id")
 	var u User
 	err := s.db.Model(&u).Where("id = ?", id).Select()
 	return u, err
 }
 
 func (s *Svc) Persist(u *User) error {
+	log.Debug().Int64("id", u.ID).Msg("persisting telegram user")
 	_, err := s.GetByID(u.ID)
 	if err != nil && errors.Is(err, pg.ErrNoRows) {
 		_, err = s.db.Model(u).Insert()
+	} else {
+		u.Updated = time.Now().UTC()
+		_, err = s.db.Model(u).WherePK().Update()
 	}
 	return err
 }
