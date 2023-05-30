@@ -12,7 +12,7 @@ const (
 	errSelectAlarms = "Error while looking for alarms"
 	errNoAlarms     = "No alarms exist for this user"
 
-	response = "These alarms are set up for the user. " +
+	response = "These alarms are set up for the current user.\n" +
 		"Tap on the alarm to delete it."
 
 	buttonDataFormat = "alarmdel %d"
@@ -55,8 +55,7 @@ func (p *Processor) Process(msg *tgbotapi.Message) *tgbotapi.MessageConfig {
 		currentRow = append(
 			currentRow,
 			tgbotapi.NewInlineKeyboardButtonData(
-				minutesToTime(
-					alarm.Minutes),
+				minutesToTime(alarm.Minutes),
 				fmt.Sprintf(buttonDataFormat, alarm.ID),
 			),
 		)

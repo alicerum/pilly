@@ -32,6 +32,7 @@ func (s *Svc) GetByUser(id int64) ([]Alarm, error) {
 	err := s.db.Model(&alarms).
 		Relation("User").
 		Where("user_id = ?", id).
+		Order("minutes ASC").
 		Select()
 
 	if err != nil {
@@ -55,5 +56,15 @@ func (s *Svc) GetByID(id int) (*Alarm, error) {
 func (s *Svc) Persist(alarm *Alarm) error {
 	alarm.Created = time.Now().UTC()
 	_, err := s.db.Model(alarm).Insert()
+	return err
+}
+
+func (s *Svc) Delete(alarm *Alarm) error {
+	_, err := s.db.Model(alarm).WherePK().Delete()
+	return err
+}
+
+func (s *Svc) DeleteByID(id int) error {
+	_, err := s.db.Model((*Alarm)(nil)).Where("id = ?", id).Delete()
 	return err
 }

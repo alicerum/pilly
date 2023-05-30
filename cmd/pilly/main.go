@@ -68,6 +68,11 @@ func main() {
 
 	updates := bot.GetUpdatesChan(upd)
 	for update := range updates {
+		// ignore all public communications
+		if !update.FromChat().IsPrivate() {
+			continue
+		}
+
 		if update.Message != nil {
 			user := users.User{
 				ID:        update.Message.From.ID,
@@ -79,7 +84,7 @@ func main() {
 			dbSvc.Users().Persist(&user)
 
 			if update.Message.IsCommand() {
-				response, err := dispatcher.Process(update.Message)
+				response, err := dispatcher.ProcessCmd(update.Message)
 				if err != nil {
 					log.Error().Err(err).Msg("could not process tg message")
 				} else {
@@ -88,6 +93,23 @@ func main() {
 						log.Error().Err(err).Msg("could not send response")
 					}
 				}
+			}
+		}
+
+		if update.CallbackQuery != nil {
+			cbk, msg, err := dispatcher.ProcessCallback(update.CallbackQuery)
+			if err != nil {
+				log.Error().Err(err).Msg("could not process callback")
+				continue
+			}
+
+			if _, err := bot.Request(cbk); err != nil {
+				log.Error().Err(err).Msg("could not request callback")
+				continue
+			}
+
+			if _, err := bot.Send(msg); err != nil {
+				log.Error().Err(err).Msg("could not send callback response")
 			}
 		}
 	}
