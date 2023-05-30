@@ -6,9 +6,9 @@ require (
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.4.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/joho/godotenv v1.5.1
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.15.0
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -17,7 +17,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -40,6 +39,7 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )

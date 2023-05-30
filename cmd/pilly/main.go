@@ -87,11 +87,13 @@ func main() {
 				response, err := dispatcher.ProcessCmd(update.Message)
 				if err != nil {
 					log.Error().Err(err).Msg("could not process tg message")
-				} else {
-					_, err := bot.Send(response)
-					if err != nil {
-						log.Error().Err(err).Msg("could not send response")
-					}
+					continue
+				}
+
+				_, err = bot.Send(response)
+				if err != nil {
+					log.Error().Err(err).Msg("could not send response")
+					continue
 				}
 			}
 		}
