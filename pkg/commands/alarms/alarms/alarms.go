@@ -38,7 +38,7 @@ func minutesToTime(minutes int) string {
 }
 
 func (p *Processor) Process(msg *tgbotapi.Message) *tgbotapi.MessageConfig {
-	alarms, err := p.db.Alarms().GetByUser(msg.From.ID)
+	alarms, err := p.db.Alarms().GetByUserID(msg.From.ID)
 	if err != nil {
 		log.Error().Err(err).Msg("error while selecting alarms")
 		return createResult(msg, errSelectAlarms)

@@ -16,17 +16,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("1.com", "http://1.com"),
-		tgbotapi.NewInlineKeyboardButtonData("2", "2data"),
-		tgbotapi.NewInlineKeyboardButtonData("3", "3data"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("4", "4data"),
-	),
-)
-
 func printErrAndExit(errMsg string, err error) {
 	fmt.Fprintf(os.Stderr, "%v: %v\n", errMsg, err)
 	os.Exit(1)
@@ -94,6 +83,22 @@ func main() {
 				if err != nil {
 					log.Error().Err(err).Msg("could not send response")
 					continue
+				}
+			} else {
+				msg, err := dispatcher.ProcessInput(update.Message)
+				if err != nil {
+					log.Error().Err(err).Msg("error while processing user input")
+					continue
+				}
+				if msg == nil {
+					log.Debug().
+						Int64("userID", update.Message.From.ID).
+						Msg("not expected input from user")
+					continue
+				}
+
+				if _, err := bot.Send(msg); err != nil {
+					log.Error().Err(err).Msg("could not send input response to user")
 				}
 			}
 		}

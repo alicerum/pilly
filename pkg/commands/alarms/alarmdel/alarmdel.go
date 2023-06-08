@@ -10,6 +10,7 @@ import (
 
 const (
 	errCouldNotDelete = "Could not delete alarm"
+	errWrongArgs      = "Wrong arguments"
 	success           = "Alarm has been successfully deleted"
 )
 
@@ -44,11 +45,16 @@ func createCbkAndMsg(
 
 func (p *Processor) Process(
 	query *tgbotapi.CallbackQuery,
-	args string,
+	args []string,
 ) (*tgbotapi.CallbackConfig, *tgbotapi.MessageConfig) {
-	alarmID, err := strconv.Atoi(args)
+	if len(args) < 1 {
+		log.Error().Msg("not enough arguments")
+		return createCbkAndMsg(query, errWrongArgs)
+	}
+
+	alarmID, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.Error().Err(err).Str("args", args).Msg("could not parse alarmdel arg")
+		log.Error().Err(err).Str("args", args[0]).Msg("could not parse alarmdel arg")
 		return createCbkAndMsg(query, errCouldNotDelete)
 	}
 

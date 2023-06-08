@@ -11,6 +11,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+type InputType string
+
+const (
+	DailyScheduleMsg InputType = "DailyScheduleMsg"
+)
+
 type Cmd string
 
 const (
@@ -24,22 +30,29 @@ var (
 	ErrNotCmd               = errors.New("not a command")
 	ErrCmdNotSupported      = errors.New("command not supported")
 	ErrCallbackNotSupported = errors.New("callback not supported")
+	ErrInputNotSupported    = errors.New("user input type not supported")
 )
 
 type CmdProcessor interface {
 	Process(msg *tgbotapi.Message) *tgbotapi.MessageConfig
 }
 
+type InputProcessor interface {
+	Process(msg *tgbotapi.Message) *tgbotapi.MessageConfig
+}
+
 type CallbackProcessor interface {
 	Process(
 		query *tgbotapi.CallbackQuery,
-		args string,
+		args []string,
 	) (*tgbotapi.CallbackConfig, *tgbotapi.MessageConfig)
 }
 
 type Dispatcher struct {
 	cmdProcessors      map[Cmd]CmdProcessor
 	callbackProcessors map[Cmd]CallbackProcessor
+	inputProcessors    map[InputType]InputProcessor
+	awaitingInput      map[int64]InputType
 }
 
 func fillCmdProcessors(db *db.Svc) map[Cmd]CmdProcessor {
@@ -59,6 +72,7 @@ func NewDispatcher(db *db.Svc) *Dispatcher {
 	return &Dispatcher{
 		cmdProcessors:      fillCmdProcessors(db),
 		callbackProcessors: fillCallbackProcessors(db),
+		awaitingInput:      map[int64]InputType{},
 	}
 }
 
@@ -80,13 +94,31 @@ func (d *Dispatcher) ProcessCmd(
 func (d *Dispatcher) ProcessCallback(
 	query *tgbotapi.CallbackQuery,
 ) (*tgbotapi.CallbackConfig, *tgbotapi.MessageConfig, error) {
-
 	parts := strings.Split(query.Data, " ")
 	proc, ok := d.callbackProcessors[Cmd(parts[0])]
 	if !ok {
 		return nil, nil, ErrCmdNotSupported
 	}
 
-	cbk, msg := proc.Process(query, strings.Join(parts[1:], " "))
+	cbk, msg := proc.Process(query, parts[1:])
 	return cbk, msg, nil
+}
+
+func (d *Dispatcher) ProcessInput(
+	msg *tgbotapi.Message,
+) (*tgbotapi.MessageConfig, error) {
+	userID := msg.From.ID
+	inputType, ok := d.awaitingInput[userID]
+	if !ok {
+		return nil, nil
+	}
+
+	delete(d.awaitingInput, userID)
+
+	proc, ok := d.inputProcessors[inputType]
+	if !ok {
+		return nil, ErrInputNotSupported
+	}
+
+	return proc.Process(msg), nil
 }

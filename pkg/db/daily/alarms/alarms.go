@@ -27,11 +27,11 @@ func NewSvc(db *pg.DB) *Svc {
 	}
 }
 
-func (s *Svc) GetByUser(id int64) ([]Alarm, error) {
+func (s *Svc) GetByUserID(userID int64) ([]Alarm, error) {
 	var alarms []Alarm
 	err := s.db.Model(&alarms).
 		Relation("User").
-		Where("user_id = ?", id).
+		Where("user_id = ?", userID).
 		Order("minutes ASC").
 		Select()
 
