@@ -19,6 +19,10 @@ migrate:
 	$(GO) run ./cmd/migrations/*.go -config $(CONFIG)
 
 .PHONY: migrations
+migrate-init:
+	$(GO) run ./cmd/migrations/*.go -config $(CONFIG) init
+
+.PHONY: migrations
 migrate-down:
 	$(GO) run ./cmd/migrations/*.go -config $(CONFIG) down
 

@@ -24,7 +24,7 @@ func NewProcessor(db *db.Svc) *Processor {
 	}
 }
 
-func creatCbk(query *tgbotapi.CallbackQuery, text string) *tgbotapi.CallbackConfig {
+func createCbk(query *tgbotapi.CallbackQuery, text string) *tgbotapi.CallbackConfig {
 	callback := tgbotapi.NewCallback(query.ID, text)
 	return &callback
 }
@@ -38,7 +38,7 @@ func createCbkAndMsg(
 	query *tgbotapi.CallbackQuery,
 	text string,
 ) (*tgbotapi.CallbackConfig, *tgbotapi.MessageConfig) {
-	callback := creatCbk(query, text)
+	callback := createCbk(query, text)
 	msg := createMsg(query, text)
 	return callback, msg
 }
